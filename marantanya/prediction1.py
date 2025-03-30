@@ -107,9 +107,11 @@ print(qualifying_2025[["Driver", "PredictedRaceTime (s)"]])
 y_pred = model.predict(X_test)
 print(f"\n🔍 Model Error (MAE): {mean_absolute_error(y_test, y_pred):.2f} seconds")
 
-qualifying_2025['MAE'] = abs(qualifying_2025['PredictedRaceTime (s)'] - laps_2024['LapTime (s)'])
+qualifying_2025["MAE"] = abs(
+    qualifying_2025["PredictedRaceTime (s)"] - laps_2024["LapTime (s)"]
+)
 print("\n📊 MAE for each driver:")
-print(qualifying_2025[['Driver', 'MAE']])
+print(qualifying_2025[["Driver", "MAE"]])
 
 # Save the model
 import joblib
@@ -141,9 +143,6 @@ print(f"\n📊 Predictions saved as {predictions_filename}")
 
 # show the predictions in plotly
 import plotly.express as px
-import plotly.graph_objects as go
-import plotly.io as pio
-# pio.renderers.default = "browser"
 
 fig = px.bar(
     qualifying_2025,
