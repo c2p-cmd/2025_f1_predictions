@@ -15,7 +15,7 @@ if not os.path.exists(cache_path):
 fastf1.Cache.enable_cache(cache_path)
 
 # Load FastF1 2024 Australian GP race session
-session_2024 = fastf1.get_session(2024, 3, "R")
+session_2024 = fastf1.get_session(2024, "Australian", "R")
 session_2024.load()
 
 # Extract lap times
@@ -113,28 +113,13 @@ qualifying_2025["MAE"] = abs(
 print("\n📊 MAE for each driver:")
 print(qualifying_2025[["Driver", "MAE"]])
 
-# Save the model
-import joblib
-
-models_dir = "models"
-# Check if the models directory exists
-if not os.path.exists(models_dir):
-    os.makedirs(models_dir)
-# Save the model
-model_filename = "f1_model_marantanya.pkl"
-model_filename = os.path.join(models_dir, model_filename)
-if os.path.exists(model_filename):
-    os.remove(model_filename)
-print(joblib.dump(model, model_filename))
-print(f"\n📦 Model saved as {model_filename}")
-
 # Save the predictions
 predictions_dir = "predictions"
 # Check if the predictions directory exists
 if not os.path.exists(predictions_dir):
     os.makedirs(predictions_dir)
 # Save predictions to CSV
-predictions_filename = "f1_predictions_marantanya.csv"
+predictions_filename = "f1_predictions_AustralianGP_marantanya.csv"
 predictions_dir = os.path.join(predictions_dir, predictions_filename)
 if os.path.exists(predictions_dir):
     os.remove(predictions_dir)
