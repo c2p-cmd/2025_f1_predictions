@@ -36,12 +36,12 @@ weather_2024 = session_2024.weather_data[weather_features].copy()
 
 # Convert times to seconds
 for col in time_features:
-    laps_2024[f"{col} (s)"] = laps_2024[col].dt.total_seconds()
+    laps_2024[col] = laps_2024[col].dt.total_seconds()
 
 # Group by driver to get average sector times per driver
 sector_times_2024 = (
     laps_2024.groupby("Driver")[
-        ["Sector1Time (s)", "Sector2Time (s)", "Sector3Time (s)"]
+        ["Sector1Time", "Sector2Time", "Sector3Time"]
     ]
     .mean()
     .reset_index()
@@ -72,7 +72,7 @@ qualifying_2025 = pd.DataFrame(
             "Gabriel Bortoleto",
             "Liam Lawson",
         ],
-        "QualifyingTime (s)": [
+        "QualifyingTime": [
             90.641,
             90.723,
             90.793,
@@ -142,9 +142,10 @@ merged_data = merged_data.assign(
 
 # Define feature set (Qualifying + Sector Times)
 X = merged_data[
-    ["QualifyingTime (s)", "Sector1Time (s)", "Sector2Time (s)", "Sector3Time (s)"]
+    ["QualifyingTime", "Sector1Time", "Sector2Time", "Sector3Time"] + weather_features
 ].fillna(0)
-y = laps_2024.groupby("Driver")["LapTime (s)"].mean().reset_index()["LapTime (s)"]
+y = laps_2024.groupby("Driver")["LapTime"].mean().reset_index()["LapTime"]
+print(X.shape, y.shape)
 
 # Train Gradient Boosting Model
 X_train, X_test, y_train, y_test = train_test_split(
@@ -155,10 +156,10 @@ model.fit(X_train, y_train)
 
 # Predict race times using 2025 qualifying and sector data
 predicted_race_times = model.predict(X)
-qualifying_2025["PredictedRaceTime (s)"] = predicted_race_times
+qualifying_2025["PredictedRaceTime"] = predicted_race_times
 
 # Rank drivers by predicted race time
-qualifying_2025 = qualifying_2025.sort_values(by="PredictedRaceTime (s)", ascending=False)
+qualifying_2025 = qualifying_2025.sort_values(by="PredictedRaceTime", ascending=False)
 
 # Plot final predictions using plotly
 import plotly.express as px
@@ -166,8 +167,8 @@ import plotly.express as px
 fig = px.bar(
     qualifying_2025,
     y="Driver",
-    x="PredictedRaceTime (s)",
-    color="PredictedRaceTime (s)",
+    x="PredictedRaceTime",
+    color="PredictedRaceTime",
     title="🏁 Predicted 2025 Chinese GP Winner with New Drivers and Sector Times 🏁",
     color_continuous_scale=px.colors.sequential.Plasma,
     text_auto=True,
