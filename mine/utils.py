@@ -20,3 +20,33 @@ driver_mapping = {
     "Gabriel Bortoleto": "BOR",
     "Liam Lawson": "LAW",
 }
+
+# write a mapper to map the driver 3 letter code to the driver's number
+driver_number_mapping = {
+    "VER": 1,
+    "PER": 2,
+    "HAM": 44,
+    "RUS": 63,
+    "LEC": 16,
+    "SAI": 55,
+    "NOR": 4,
+    "PIA": 81,
+    "ALO": 14,
+    "STR": 18,
+    "GAS": 10,
+    "OCO": 31,
+    "ALB": 23,
+    "TSU": 22,
+    "BOT": 77,
+    "ZHO": 24,
+    "MAG": 20,
+    "HUL": 27,
+    "RIC": 3,
+    "DEV": 21,
+    "SAR": 2,
+    "HAD": 26,
+    "ANT": 27,
+    "BOR": 28,
+    "BEA": 29,
+    "LAW": 30,
+}
