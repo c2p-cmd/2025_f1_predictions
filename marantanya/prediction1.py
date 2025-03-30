@@ -134,7 +134,7 @@ fig = px.bar(
     x="Driver",
     y="PredictedRaceTime (s)",
     color="DriverCode",
-    title="2025 GP Predictions",
+    title="🏁 Predicted 2025 Australian GP Winner 🏁",
 )
 
 fig.show()
