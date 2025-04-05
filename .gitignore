@@ -2,3 +2,4 @@ venv/
 models/
 predictions/
 f1_cache/
+.DS_Store
