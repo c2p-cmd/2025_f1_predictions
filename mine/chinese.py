@@ -1,51 +1,9 @@
 import fastf1
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.metrics import mean_absolute_error
+from utils import load_gp_data, feature_engineering, fine_tune_model
 
 # Enable FastF1 caching
 fastf1.Cache.enable_cache("f1_cache")
-
-time_features = [
-    "LapTime",
-    "Sector1Time",
-    "Sector2Time",
-    "Sector3Time",
-]
-
-# Load 2024 Chinese GP race session
-session_2024 = fastf1.get_session(2024, "China", "R")
-session_2024.load()
-
-# Extract lap and sector times
-laps_2024 = session_2024.laps[["Driver"] + time_features].copy()
-laps_2024.dropna(inplace=True)
-
-# Extract weather data
-weather_features = [
-    "AirTemp",
-    "TrackTemp",
-    "Humidity",
-    "Pressure",
-    "WindSpeed",
-    "WindDirection",
-    "Rainfall",
-]
-weather_2024 = session_2024.weather_data[weather_features].copy()
-
-# Convert times to seconds
-for col in time_features:
-    laps_2024[col] = laps_2024[col].dt.total_seconds()
-
-# Group by driver to get average sector times per driver
-sector_times_2024 = (
-    laps_2024.groupby("Driver")[
-        ["Sector1Time", "Sector2Time", "Sector3Time"]
-    ]
-    .mean()
-    .reset_index()
-)
 
 # 2025 Qualifying Data Chinese GP
 qualifying_2025 = pd.DataFrame(
@@ -97,85 +55,17 @@ qualifying_2025 = pd.DataFrame(
     }
 )
 
-# Map full names to FastF1 3-letter codes
-driver_mapping = {
-    "Oscar Piastri": "PIA",
-    "George Russell": "RUS",
-    "Lando Norris": "NOR",
-    "Max Verstappen": "VER",
-    "Lewis Hamilton": "HAM",
-    "Charles Leclerc": "LEC",
-    "Isack Hadjar": "HAD",
-    "Andrea Kimi Antonelli": "ANT",
-    "Yuki Tsunoda": "TSU",
-    "Alexander Albon": "ALB",
-    "Esteban Ocon": "OCO",
-    "Nico Hülkenberg": "HUL",
-    "Fernando Alonso": "ALO",
-    "Lance Stroll": "STR",
-    "Carlos Sainz Jr.": "SAI",
-    "Pierre Gasly": "GAS",
-    "Oliver Bearman": "BEA",
-    "Jack Doohan": "DOO",
-    "Gabriel Bortoleto": "BOR",
-    "Liam Lawson": "LAW",
-}
+# load the data
+laps_data = load_gp_data(2024, "Chinese GP")
 
-qualifying_2025["DriverCode"] = qualifying_2025["Driver"].map(driver_mapping)
+# feature engineering
+data = feature_engineering(laps=laps_data, qualifying_data=qualifying_2025)
+X = data["X"]
+y = data["y"]
+print(f"X shape: {X.shape}, columns: {X.columns}")
+print(f"y shape: {y.shape}")
 
-# Merge qualifying data with sector times
-merged_data = qualifying_2025.merge(
-    sector_times_2024, left_on="DriverCode", right_on="Driver", how="left"
-)
+print(y)
 
-# calculate average weather conditions for 2024 and add them to the merged data
-weather_2024_avg = weather_2024.mean()
-merged_data = merged_data.assign(
-    AirTemp=weather_2024_avg["AirTemp"],
-    TrackTemp=weather_2024_avg["TrackTemp"],
-    Humidity=weather_2024_avg["Humidity"],
-    Pressure=weather_2024_avg["Pressure"],
-    WindSpeed=weather_2024_avg["WindSpeed"],
-    WindDirection=weather_2024_avg["WindDirection"],
-    Rainfall=weather_2024_avg["Rainfall"],
-).fillna(0)
-
-# Define feature set (Qualifying + Sector Times)
-X = merged_data[
-    ["QualifyingTime", "Sector1Time", "Sector2Time", "Sector3Time"] + weather_features
-].fillna(0)
-y = laps_2024.groupby("Driver")["LapTime"].mean().reset_index()["LapTime"]
-print(X.shape, y.shape)
-
-# Train Gradient Boosting Model
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=38
-)
-model = GradientBoostingRegressor(n_estimators=200, learning_rate=0.1, random_state=38)
-model.fit(X_train, y_train)
-
-# Predict race times using 2025 qualifying and sector data
-predicted_race_times = model.predict(X)
-qualifying_2025["PredictedRaceTime"] = predicted_race_times
-
-# Rank drivers by predicted race time
-qualifying_2025 = qualifying_2025.sort_values(by="PredictedRaceTime", ascending=False)
-
-# Plot final predictions using plotly
-import plotly.express as px
-
-fig = px.bar(
-    qualifying_2025,
-    y="Driver",
-    x="PredictedRaceTime",
-    color="PredictedRaceTime",
-    title="🏁 Predicted 2025 Chinese GP Winner with New Drivers and Sector Times 🏁",
-    color_continuous_scale=px.colors.sequential.Plasma,
-    text_auto=True,
-    orientation="h",
-)
-fig.show()
-
-# Evaluate Model
-y_pred = model.predict(X_test)
-print(f"\n🔍 Model Error (MAE): {mean_absolute_error(y_test, y_pred):.2f} seconds")
+# train the model
+fine_tune_model("./models/australian_gp_model.joblib", X, y, "./models/chinese_gp_model.joblib")
