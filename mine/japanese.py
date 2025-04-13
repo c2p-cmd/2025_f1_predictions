@@ -104,4 +104,10 @@ print(f"X shape: {X.shape}, columns: {X.columns}")
 print(f"y shape: {y.shape}")
 
 # fine-tune the model
-fine_tune_model("./models/chinese_gp_model.joblib", X, y, "./models/japanese_gp_model.joblib")
+fine_tune_model(
+    "Japanese GP",
+    "./models/chinese_gp_model.joblib",
+    X,
+    y,
+    "./models/japanese_gp_model.joblib",
+)

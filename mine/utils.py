@@ -2,7 +2,7 @@ from typing import Union
 import numpy as np
 import fastf1
 from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.preprocessing import MinMaxScaler, OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler, OrdinalEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import KNNImputer
 from sklearn.pipeline import Pipeline
@@ -319,7 +319,7 @@ def train_model(X: pd.DataFrame, y: pd.Series, model_file: str):
             ),
             (
                 "cat",
-                OneHotEncoder(handle_unknown="ignore"),
+                OrdinalEncoder(),
                 ["Compound"],
             ),
         ],
@@ -376,7 +376,7 @@ def train_model(X: pd.DataFrame, y: pd.Series, model_file: str):
         rows=3,
         cols=1,
         subplot_titles=[
-            "🏁 Predicted 2025 Japanese GP Winner with New Drivers and Sector Times 🏁",
+            "🏁 Predicted 2025 Australian GP Winner with Drivers and Sector Times 🏁",
             "",
             "Feature Importances from Model",
         ],
@@ -437,7 +437,11 @@ def train_model(X: pd.DataFrame, y: pd.Series, model_file: str):
 
 # Step 4: Load Model for Fine-Tuning
 def fine_tune_model(
-    model_file: str, X_new: pd.DataFrame, y_new: pd.Series, new_model_file: str
+    gp_name: str,
+    model_file: str,
+    X_new: pd.DataFrame,
+    y_new: pd.Series,
+    new_model_file: str,
 ):
     """
     Fine-tune an existing model with new data.
@@ -483,7 +487,7 @@ def fine_tune_model(
         rows=3,
         cols=1,
         subplot_titles=[
-            "🏁 Fine-tuned Predictions with New Drivers and Sector Times 🏁",
+            f"🏁 Predicted 2025 {gp_name} Winner with Drivers and Sector Times 🏁",
             "",
             "Feature Importances from Model",
         ],

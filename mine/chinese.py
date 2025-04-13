@@ -68,4 +68,10 @@ print(f"y shape: {y.shape}")
 print(y)
 
 # train the model
-fine_tune_model("./models/australian_gp_model.joblib", X, y, "./models/chinese_gp_model.joblib")
+fine_tune_model(
+    gp_name="Chinese GP",
+    model_file="./models/australian_gp_model.joblib",
+    X_new=X,
+    y_new=y,
+    new_model_file="./models/chinese_gp_model.joblib",
+)
